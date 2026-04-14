@@ -1,0 +1,35 @@
+# Pre-processed and raw EEG data
+data/
+outputs/
+*.npy
+*.fif
+*.set
+*.fdt
+
+# Weights & Biases
+wandb/
+
+# Python / Environments
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Build / Config
+.idea/
+.vscode/
+.DS_Store
+*.egg-info/
+dist/
+build/
+
+# Local/Temp
+todo
+scratch/
+system_check.py
+fnhum-19-1617748.pdf

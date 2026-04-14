@@ -1,0 +1,19 @@
+from abc import ABC, abstractmethod
+from typing import Dict, Any
+
+
+class TrackerPort(ABC):
+    @abstractmethod
+    def log_params(self, params: Dict[str, Any]) -> None:
+        """Log hyperparameters of the trial"""
+        pass
+
+    @abstractmethod
+    def log_metrics(self, metrics: Dict[str, float], step: int | None = None) -> None:
+        """Log trial metrics (loss, accuracy, etc)"""
+        pass
+        
+    @abstractmethod
+    def finish(self) -> None:
+        """Close the tracking session"""
+        pass

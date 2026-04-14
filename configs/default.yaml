@@ -1,0 +1,43 @@
+mode: "preprocess" # options: "train", "preprocess"
+
+defaults:
+  - _self_
+  - model: eegnet   # loads configs/model/eegnet.yaml -> cfg.model.*
+
+preprocessing:
+  high_pass: 4.0
+  low_pass: 40.0
+  target_sample_rate: 128
+  ica: true
+  reference_channels: ["M1", "M2"]
+  eog_channels: ["VEOG", "HEOG"]
+
+  # Epoch extraction window (seconds relative to event onset)
+  tmin: -0.2
+  tmax: 4.0
+
+  # Baseline correction window (seconds relative to epoch start)
+  baseline_correction: true
+  baseline_tmin: null   # null = start of epoch
+  baseline_tmax: 0.0
+
+  # Marker-to-label mapping: each key is the raw annotation string from the .set file.
+  # Multiple markers can map to the same label (e.g. rest pooling).
+  # Change values to control how many classes the model sees.
+  class_map:
+    "11": 1   # right biceps
+    "12": 2   # right triceps
+    "13": 3   # resting
+    "98": 0   # resting eyes open
+    "99": 0   # resting eyes closed
+
+  # Data splitting into subfolders
+  splits:
+    preprocessed: ["11", "12", "13"]
+    eyes_open: ["98"]
+    eyes_closed: ["99"]
+
+data:
+  raw_path: "data/raw"
+  preprocessed_path: "data/preprocessed"
+  vps: ["VP110"]
