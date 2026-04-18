@@ -9,7 +9,21 @@ class ModelConfig(BaseModel):
     epochs: int = 50
     lr: float = 0.001
     batch_size: int = 32
-
+    training_mode: str = "independent" # Options: "independent", "sequential", "combined"
+    
+    # New Model Parameters
+    optimizer: str = "adam"
+    loss: str = "cross_entropy"
+    metrics: List[str] = ["accuracy"]
+    n_classes: int = 4
+    which_classes: List[str] = []
+    output_activation: str = "log_softmax"
+    
+    # Future proofing
+    weight_decay: float = 0.0
+    lr_scheduler: Optional[str] = None
+    early_stopping_patience: int = 10
+    seed: int = 42
 
 class EEGNetConfig(ModelConfig):
     """Specialized config for the EEGNet architecture"""
@@ -19,7 +33,6 @@ class EEGNetConfig(ModelConfig):
     kernLength: int = 64
     dropoutRate: float = 0.5
     dropoutType: str = "spatial"
-    n_classes: int = 4
     channels: int = 61
     samples: int = 538
     bias: bool = False
@@ -58,3 +71,7 @@ class PreprocessingConfig(BaseModel):
     classes: List[str] = ['11', '12', '13']
     resting_classes: List[str] = ['98', '99']
     splits: Optional[Dict[str, List[str]]] = None
+
+    # Splitting parameters
+    test_size: float = 0.2
+    split_seed: int = 42

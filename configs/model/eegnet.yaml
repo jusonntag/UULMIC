@@ -4,9 +4,20 @@
 name: "eegnet"
 
 # Training hyperparameters
-epochs: 50
+epochs: 500
 lr: 0.001
 batch_size: 32
+training_mode: "independent"
+optimizer: "adamw"
+loss: "cross_entropy"
+metrics: ["accuracy"]
+n_classes: 3
+which_classes: ["right biceps", "right triceps", "resting"]
+output_activation: "log_softmax"
+weight_decay: 0.0
+lr_scheduler: null
+early_stopping_patience: 10
+seed: 42
 
 # Architecture hyperparameters
 # These are read by EEGNet.__init__(config) directly.
@@ -15,10 +26,9 @@ batch_size: 32
 #   samples  = int((tmax - tmin) * target_sample_rate) + 1
 F1: 8             # Number of temporal filters
 D: 2              # Depth multiplier (F2 = F1 * D = 16)
-kernLength: 64    # Temporal kernel length (= target_sample_rate / 2 is a good rule of thumb)
+kernLength: 62    # Temporal kernel length (= target_sample_rate / 2 is a good rule of thumb)
 dropoutRate: 0.5
 dropoutType: "spatial"   # "spatial" = Dropout2d | "base" = Dropout
-n_classes: 4      # Must equal number of unique labels in class_map
-channels: 61      # Set to actual EEG channel count after dropping EOG/ref channels
-samples: 577      # = int((4.0 - (-0.2)) * 128) + 1  <- tmax=4.0, tmin=-0.2, sr=128 -> tmax=4.5, sr=128, (4.0+0.2)*128+1=538+1... actually (4.0 - (-0.2)) * 128 + 1 = 4.2*128+1 = 537.6+1 ~ 538; adjust after first run
+channels: 62      # Target channel count
+samples: 577      # Target samples at 128Hz
 bias: false

@@ -1,4 +1,8 @@
-mode: "preprocess" # options: "train", "preprocess"
+mode: "train" # options: "train", "preprocess"
+
+# In train mode, iterate through these model configs:
+models_to_train: ["eegnet"] # Use ["all"] to iterate all models in configs/model/
+model_save_dir: "data/trained_models"
 
 defaults:
   - _self_
@@ -11,9 +15,10 @@ preprocessing:
   ica: true
   reference_channels: ["M1", "M2"]
   eog_channels: ["VEOG", "HEOG"]
+  test_size: 0.2
 
   # Epoch extraction window (seconds relative to event onset)
-  tmin: -0.2
+  tmin: -0.5
   tmax: 4.0
 
   # Baseline correction window (seconds relative to epoch start)
@@ -24,12 +29,13 @@ preprocessing:
   # Marker-to-label mapping: each key is the raw annotation string from the .set file.
   # Multiple markers can map to the same label (e.g. rest pooling).
   # Change values to control how many classes the model sees.
+  # Note: PyTorch expects 0-indexed labels [0, 1, 2...] for classification.
   class_map:
-    "11": 1   # right biceps
-    "12": 2   # right triceps
-    "13": 3   # resting
-    "98": 0   # resting eyes open
-    "99": 0   # resting eyes closed
+    "11": 0   # right biceps
+    "12": 1   # right triceps
+    "13": 2   # resting
+    "98": 0   # resting eyes open (not used in main train split)
+    "99": 0   # resting eyes closed (not used in main train split)
 
   # Data splitting into subfolders
   splits:
@@ -39,5 +45,6 @@ preprocessing:
 
 data:
   raw_path: "data/raw"
-  preprocessed_path: "data/preprocessed"
+  preprocessed_path: "data"
   vps: ["VP110"]
+  epoched_path: "data/preprocessed"

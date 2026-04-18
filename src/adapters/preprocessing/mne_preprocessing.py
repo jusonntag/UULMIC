@@ -22,6 +22,7 @@ class MneFilterStep(PreprocessingStepPort):
 class MneResampleStep(PreprocessingStepPort):
     def process(self, data: mne.io.Raw) -> mne.io.Raw:
         resampled = data.copy()
+        print(f'\033[90mResampling data from {data.info["sfreq"]} Hz to {self.config.target_sample_rate} Hz\033[0m')
         resampled.resample(sfreq=self.config.target_sample_rate)
         return resampled
 
@@ -56,10 +57,10 @@ class MneReferencingStep(PreprocessingStepPort):
 
         # 1. Apply EEG Reference
         if self.config.reference_channels == ["average"]:
-            print("Applying Common Average Reference (CAR)")
+            print("\033[90mApplying Common Average Reference (CAR)\033[0m")
             ref_data.set_eeg_reference(ref_channels="average")
         elif self.config.reference_channels:
-            print(f"Applying EEG Reference: {self.config.reference_channels}")
+            print(f"\033[90mApplying EEG Reference: {self.config.reference_channels}\033[0m")
             ref_data.set_eeg_reference(ref_channels=self.config.reference_channels)
             # Track specified reference channels for removal if they exist in raw data
             for ch in self.config.reference_channels:
@@ -74,7 +75,7 @@ class MneReferencingStep(PreprocessingStepPort):
 
         # 3. Physically remove the channels
         if removed_channels:
-            print(f"Removing channels: {removed_channels}")
+            print(f"\033[90mRemoving channels: {removed_channels}\033[0m")
             ref_data.drop_channels(removed_channels)
             
         # Store removed channels in the info object for later retrieval by EpochingStep
@@ -108,8 +109,8 @@ class MneEpochingStep(PreprocessingStepPort):
                 f"  Annotations in data   : {[str(k).strip() for k in event_id.keys()]}"
             )
             
-        print(f"Epoching events : { {str(k).strip(): v for k, v in clean_event_id.items()} }")
-        print(f"Label mapping   : {mne_to_label}")
+        print(f"\033[90mEpoching events : { {str(k).strip(): v for k, v in clean_event_id.items()} }\033[0m")
+        print(f"\033[90mLabel mapping   : {mne_to_label}\033[0m")
         
         # Epoch window and baseline are fully configurable
         tmin = self.config.tmin
@@ -145,6 +146,7 @@ class MneEpochingStep(PreprocessingStepPort):
         removed_channels = getattr(data, "_removed_channels", [])
 
         metadata = TrialMetadata(
+            subject_id=getattr(data, "subject_id", "unknown"),
             window_begin_sec=tmin,
             window_end_sec=tmax,
             sample_rate=int(data.info['sfreq']),

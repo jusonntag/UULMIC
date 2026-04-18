@@ -32,9 +32,10 @@ def _save_processed_data(processed_data: Any, vp_id: str, vp_out: Path):
 
 def preprocess_single_vp(vp_id: str, loader: DataLoaderPort, steps: List[PreprocessingStepPort], output_dir: Path):
     """Preprocess a single subject and save result, potentially splitting into multiple datasets."""
-    print(f"[{vp_id}] Starting preprocessing...")
     try:
         raw_data = loader.load_raw_subject(vp_id)
+        # Attach subject_id for downstream metadata creation
+        raw_data.subject_id = vp_id
         
         # 1. Identify "Base" steps vs "Final" steps.
         # Everything before the last step (assumed to be Epoching) is Base.
@@ -48,13 +49,14 @@ def preprocess_single_vp(vp_id: str, loader: DataLoaderPort, steps: List[Preproc
         # 2. Run Base Pipeline
         processed_data = raw_data
         for step in base_steps:
+            print(f"[\033[94m{vp_id}\033[0m] Processing with \033[96m{step.__class__.__name__}\033[0m...")
             processed_data = step.process(processed_data)
         
         # 3. Handle Splitting or Single Run
         if config.splits:
-            print(f"[{vp_id}] Splitting data into: {list(config.splits.keys())}")
+            print(f"[\033[94m{vp_id}\033[0m] \033[93mSplitting data into\033[0m: \033[95m{list(config.splits.keys())}\033[0m")
             for split_name, markers in config.splits.items():
-                print(f"[{vp_id}] Executing split: {split_name}")
+                print(f"[\033[94m{vp_id}\033[0m] \033[92mExecuting split\033[0m: \033[95m{split_name}\033[0m")
                 # Create a temporary config override for this split
                 # We filter the class_map to only include markers for this split
                 split_class_map = {m: label for m, label in config.class_map.items() if m in markers}
@@ -77,16 +79,16 @@ def preprocess_single_vp(vp_id: str, loader: DataLoaderPort, steps: List[Preproc
                     save_path = output_dir / split_name / vp_id
                     _save_processed_data(split_result, vp_id, save_path)
                 except Exception as split_err:
-                    print(f"[{vp_id}] Error in split '{split_name}': {split_err}")
+                    print(f"[\033[94m{vp_id}\033[0m] \033[91mError in split '{split_name}': {split_err}\033[0m")
         else:
             # Legacy behavior: just run the final step once
             processed_data = final_step.process(processed_data)
             _save_processed_data(processed_data, vp_id, output_dir / vp_id)
             
-        print(f"[{vp_id}] Finished preprocessing.")
+        print(f"[\033[94m{vp_id}\033[0m] \033[92mFinished preprocessing.\033[0m")
         
     except Exception as e:
-        print(f"[{vp_id}] Error: {e}")
+        print(f"[\033[94m{vp_id}\033[0m] \033[91mError: {e}\033[0m")
         import traceback
         traceback.print_exc()
 

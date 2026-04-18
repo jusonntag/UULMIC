@@ -10,6 +10,8 @@ class TrialMetadata(BaseModel):
     """
     model_config = ConfigDict(extra = 'forbid') # Prevent accidental typos in fields
     
+    subject_id: str = Field(..., description = "ID of the subject (e.g., 'VP110')")
+
     # Time properties
     window_begin_sec: float = Field(..., description = "Start of window relative to event (e.g., -0.5)")
     window_end_sec: float = Field(..., description = "End of window relative to event (e.g., 4.0)")

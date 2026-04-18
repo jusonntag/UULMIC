@@ -124,6 +124,15 @@ class EEGNet(nn.Module):
             dropout_layer,
         )
 
+        if config.output_activation == "log_softmax":
+            activation = nn.LogSoftmax(dim=1)
+        elif config.output_activation == "softmax":
+            activation = nn.Softmax(dim=1)
+        elif config.output_activation == "sigmoid":
+            activation = nn.Sigmoid()
+        else: # default linear
+            activation = nn.Identity()
+
         # classification block
         self.classify = nn.Sequential(
             nn.Flatten(),
@@ -131,8 +140,7 @@ class EEGNet(nn.Module):
                 in_features = self._get_num_inputs(),
                 out_features = config.n_classes,
             ),
-            #nn.Softmax()
-            nn.LogSoftmax(dim=1), # LogSoftmax is preferred for training with CrossEntropyLoss/NLLLoss
+            activation,
         )
 
     def _get_num_inputs(self):
@@ -143,12 +151,14 @@ class EEGNet(nn.Module):
             dummy_data = self.block1(dummy_data)
             dummy_data = self.block2(dummy_data)
 
-        return self.F2 * dummy_data.shape[3]
+        return self.config.F2 * dummy_data.shape[3]
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Shape of input data should be (Batch, 1, Channels, Samples)."""
-
+        """Shape of input data should be (Batch, Channels, Samples)."""
+        assert x.ndim == 3, f"Input data must be 3D (Batch, Channels, Samples), but got {x.ndim}D"
+        # Add channel dimension
+        x = x.unsqueeze(1)
         # block 1
         x = self.block1(x)
 
