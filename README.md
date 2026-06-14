@@ -2,6 +2,36 @@
 
 This repository contains deep learning and machine learning implementations for classifying unilateral upper limb motor imagery using EEG data.
 
+## Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/jusonntag/UULMIC.git
+   cd UULMIC
+   ```
+
+2. **Install `uv` (if not already installed):**
+   ```bash
+   pip install uv
+   ```
+   or Homebrew:
+   ```bash
+   brew install uv
+   ```
+
+3. **Install dependencies and sync environment:**
+   ```bash
+   uv sync
+   ```
+
+4. **Weights & Biases (W&B) Tracking:**
+   This project uses [Weights & Biases](https://wandb.ai/) for experiment tracking. To enable it:
+   - Create a free account at [wandb.ai](https://wandb.ai/)
+   - Get your API token from your account settings
+   - Create a `.env` file in the project root and add your token:
+     ```env
+     WANDB_API_KEY=your_api_token_here
+     ```
 ## Usage
 
 Run commands via `uv` to automatically handle dependencies and environments.
@@ -16,7 +46,7 @@ uv run uulmic mode=preprocess
 uv run uulmic
 ```
 
-*(Optional) Override config parameters on the fly:*
+Override config parameters on the fly:
 ```bash
 uv run uulmic model.batch_size=8
 ```
