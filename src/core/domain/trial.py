@@ -38,7 +38,7 @@ class TrialMetadata(BaseModel):
 
 class TrialData(BaseModel):
     """
-    The fundamental Core Entity for a training/evaluation dataset in UULMI.
+    The fundamental Core Entity for a training/evaluation dataset in UULMIC.
     Contains the raw numpy voltages and the strict chronological metadata.
     """
     model_config = ConfigDict(arbitrary_types_allowed=True) # Required to allow raw numpy arrays

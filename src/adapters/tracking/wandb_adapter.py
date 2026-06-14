@@ -5,9 +5,18 @@ from src.core.ports.tracker import TrackerPort
 
 class WandbTrackerAdapter(TrackerPort):
     def __init__(self, project_name: str, group_name: str | None = None, run_name: str | None = None):
+        self.project_name = project_name
+        self.group_name = group_name
+        self.run = None
+        if run_name:
+            self.init_run(run_name)
+            
+    def init_run(self, run_name: str) -> None:
+        if self.run is not None:
+            self.finish()
         self.run = wandb.init(
-            project=project_name,
-            group=group_name,
+            project=self.project_name,
+            group=self.group_name,
             name=run_name,
             reinit=True
         )
@@ -19,4 +28,4 @@ class WandbTrackerAdapter(TrackerPort):
         wandb.log(metrics, step=step)
         
     def finish(self) -> None:
-        wandb.finish()
+        wandb.finish(quiet=True)

@@ -36,6 +36,10 @@ def run_training_usecase(
                 subject_id = trial_data.metadata.subject_id
                 print(f"\n--- Training on Subject: {subject_id} ---")
                 
+                # 1. Initialize Tracker Run (if independent)
+                if mode == "independent":
+                    tracker.init_run(f"{run_id}_{subject_id}")
+                
                 # 2. Reset model weights if in independent mode
                 if mode == "independent":
                     print(f"Resetting model for {subject_id}...")
@@ -59,7 +63,7 @@ def run_training_usecase(
                 print(f"Train samples: {len(X_train)}, Test samples: {len(X_test)}")
 
                 # 5. Train
-                model.fit(X_train, y_train, tracker=tracker)
+                model.fit(X_train, y_train, X_val=X_test, y_val=y_test, tracker=tracker)
                 
                 # 6. Evaluate
                 metrics = model.evaluate(X_test, y_test)
@@ -68,13 +72,13 @@ def run_training_usecase(
                 # Distinguish between train and test accuracy if needed, 
                 # but 'accuracy' from evaluate is typically the test accuracy.
                 prefixed_metrics = {f"{subject_id}_test_{k}": v for k, v in metrics.items()}
-                tracker.log_metrics(prefixed_metrics)
                 
                 # 7. Save Model
                 save_path = run_save_dir / f"{subject_id}_{model.config.name}.pt"
                 model.save(str(save_path))
                 
-                print(f"Finished {subject_id} with metrics: {metrics}")
+                print(f"\n\033[92mFinished {subject_id} - Test Loss: {metrics.get('loss', 0):.4f} - Test Acc: {metrics.get('accuracy', 0):.4f}\033[0m")
+                print(f"Full metrics: {metrics}")
                 print(f"Model saved to {save_path}")
 
         elif mode == "combined":

@@ -23,13 +23,12 @@ preprocessing:
 
   # Baseline correction window (seconds relative to epoch start)
   baseline_correction: true
-  baseline_tmin: null   # null = start of epoch
+  baseline_tmin: -0.2   # null = start of epoch
   baseline_tmax: 0.0
 
   # Marker-to-label mapping: each key is the raw annotation string from the .set file.
   # Multiple markers can map to the same label (e.g. rest pooling).
   # Change values to control how many classes the model sees.
-  # Note: PyTorch expects 0-indexed labels [0, 1, 2...] for classification.
   class_map:
     "11": 0   # right biceps
     "12": 1   # right triceps
@@ -46,5 +45,5 @@ preprocessing:
 data:
   raw_path: "data/raw"
   preprocessed_path: "data"
-  vps: ["VP110"]
+  vps: ["VP110", "VP111"]
   epoched_path: "data/preprocessed"

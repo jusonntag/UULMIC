@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
-from typing import Dict, Any, Type, Callable
+from typing import Dict, Any, Type, Callable, Optional
+from sklearn.metrics import precision_score, recall_score, f1_score, cohen_kappa_score
 
 from src.core.ports.model import BaseModelPort
 from src.core.domain.config import ModelConfig
@@ -10,8 +11,7 @@ from src.core.domain.config import ModelConfig
 class PyTorchModelAdapter(BaseModelPort):
     """
     A generic PyTorch Trainer adapter. 
-    It can wrap ANY torch.nn.Module (EEGNet, FBCNet, etc) so you don't need
-    to write a new adapter for every architectural change.
+    It can wrap ANY torch.nn.Module (EEGNet, FBCNet, etc).
     """
     def __init__(
         self, 
@@ -52,17 +52,21 @@ class PyTorchModelAdapter(BaseModelPort):
             raise ValueError(f"Optimizer {opt_name} not supported.")
         return opt_map[opt_name]
         
-    def fit(self, X: np.ndarray, y: np.ndarray, tracker: Optional['TrackerPort'] = None) -> None:
+    def fit(self, X: np.ndarray, y: np.ndarray, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, tracker: Optional['TrackerPort'] = None) -> None:
         # Wrap in dataloader (X is passed exactly as provided by TrialData)
         X_tensor = torch.FloatTensor(X)
         y_tensor = torch.LongTensor(y)
+
+        if X_val is not None and y_val is not None:
+            X_val_tensor = torch.FloatTensor(X_val).to(self.device)
+            y_val_tensor = torch.LongTensor(y_val).to(self.device)
 
         dataset = TensorDataset(X_tensor, y_tensor)
         loader = DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True)
         
         print(f"\033[90mTraining model for {self.config.epochs} epochs with batch size {self.config.batch_size}\033[0m")
-        self.model.train()
         for epoch in range(self.config.epochs):
+            self.model.train()
             total_loss = 0.0
             total_correct = 0
             total_samples = 0
@@ -86,14 +90,36 @@ class PyTorchModelAdapter(BaseModelPort):
             avg_loss = total_loss / len(loader)
             train_acc = total_correct / total_samples
             
+            metrics_dict = {
+                "train_loss": avg_loss,
+                "train_acc": train_acc
+            }
+            
+            val_loss_val = None
+            val_acc_val = None
+            if X_val is not None and y_val is not None:
+                self.model.eval()
+                with torch.no_grad():
+                    outputs = self.model(X_val_tensor)
+                    val_loss = self.criterion(outputs, y_val_tensor).item()
+                    _, predicted = torch.max(outputs.data, 1)
+                    val_acc = (predicted == y_val_tensor).sum().item() / y_val_tensor.size(0)
+                    
+                    val_loss_val = val_loss
+                    val_acc_val = val_acc
+                    
+                    metrics_dict["test_loss"] = val_loss
+                    metrics_dict["test_acc"] = val_acc
+            
             if tracker:
-                tracker.log_metrics({
-                    "train_loss": avg_loss,
-                    "train_acc": train_acc
-                }, step=epoch)
+                tracker.log_metrics(metrics_dict)
             
             if (epoch + 1) % 10 == 0 or epoch == 0:
-                print(f"\033[90mEpoch {epoch + 1}/{self.config.epochs} - loss: {avg_loss:.4f} - acc: {train_acc:.4f}\033[0m")
+                print_str = f"\033[90mEpoch {epoch + 1}/{self.config.epochs} - loss: {avg_loss:.4f} - acc: {train_acc:.4f}"
+                if val_loss_val is not None:
+                    print_str += f" - test_loss: {val_loss_val:.4f} - test_acc: {val_acc_val:.4f}"
+                print_str += "\033[0m"
+                print(print_str)
                 
     def predict(self, X: np.ndarray) -> np.ndarray:
         self.model.eval()
@@ -107,8 +133,18 @@ class PyTorchModelAdapter(BaseModelPort):
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict[str, float]:
         preds = self.predict(X)
         accuracy = (preds == y).mean()
-        # You can expand this to include F1, kappa, etc.
-        return {"accuracy": float(accuracy)}
+        precision = precision_score(y, preds, average='weighted', zero_division=0)
+        recall = recall_score(y, preds, average='weighted', zero_division=0)
+        f1 = f1_score(y, preds, average='weighted', zero_division=0)
+        kappa = cohen_kappa_score(y, preds)
+
+        return {
+            "accuracy": float(accuracy),
+            "precision": float(precision),
+            "recall": float(recall),
+            "f1": float(f1),
+            "kappa": float(kappa)
+        }
         
     def get_params(self) -> Dict[str, Any]:
         # Log training config and total model parameters count

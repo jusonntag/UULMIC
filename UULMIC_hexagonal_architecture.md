@@ -1,4 +1,4 @@
-# UULMI — Hexagonal Architecture Deep Dive
+# UULMIC — Hexagonal Architecture Deep Dive
 
 > **Goal**: Understand the Hexagonal (Ports & Adapters) architecture as implemented in this EEG research pipeline, and extract transferable patterns for any project.
 
@@ -10,7 +10,7 @@ The hexagonal architecture organizes code into concentric rings. **The Dependenc
 
 ```mermaid
 graph TB
-    subgraph EXTERNAL["🌍 EXTERNAL WORLD"]
+    subgraph EXTERNAL["EXTERNAL WORLD"]
         direction TB
         MNE["MNE-Python<br/>(EEG Library)"]
         PyTorch["PyTorch<br/>(Deep Learning)"]
@@ -20,7 +20,7 @@ graph TB
         FS["File System<br/>(.set, .fif, .npy)"]
     end
 
-    subgraph ADAPTERS["🔌 ADAPTERS (Infrastructure)"]
+    subgraph ADAPTERS["ADAPTERS (Infrastructure)"]
         direction TB
         MneLoader["MneDataLoaderAdapter"]
         MneFilter["MneFilterStep"]
@@ -32,7 +32,7 @@ graph TB
         EEGNet["EEGNet Architecture"]
     end
 
-    subgraph PORTS["🔷 PORTS (Interfaces / Contracts)"]
+    subgraph PORTS["PORTS (Interfaces / Contracts)"]
         direction TB
         DataLoaderPort["DataLoaderPort<br/>⟨abstract⟩"]
         PreprocessingStepPort["PreprocessingStepPort<br/>⟨abstract⟩"]
@@ -40,7 +40,7 @@ graph TB
         TrackerPort["TrackerPort<br/>⟨abstract⟩"]
     end
 
-    subgraph CORE["💎 CORE DOMAIN (Pure Business Logic)"]
+    subgraph CORE["CORE DOMAIN (Pure Business Logic)"]
         direction TB
         TrialData["TrialData"]
         TrialMetadata["TrialMetadata"]
@@ -48,13 +48,13 @@ graph TB
         PreprocessingConfig["PreprocessingConfig"]
     end
 
-    subgraph USECASES["⚙️ USE CASES (Application Logic)"]
+    subgraph USECASES["USE CASES (Application Logic)"]
         direction TB
         RunPreprocessing["run_preprocessing_usecase"]
         RunTraining["run_training_usecase"]
     end
 
-    subgraph DRIVING["🎮 DRIVING ADAPTER (Entry Point)"]
+    subgraph DRIVING["DRIVING ADAPTER (Entry Point)"]
         CLI["cli.py<br/>(Hydra CLI)"]
     end
 
@@ -109,7 +109,7 @@ graph TB
 ## 2. File Tree with Roles
 
 ```
-UULMI/
+UULMIC/
 ├── main.py                          # System check (not the real entry point)
 ├── configs/
 │   ├── default.yaml                 # Hydra root config
@@ -119,9 +119,9 @@ UULMI/
 │   └── preprocessing/               # Preprocessing config overrides
 │
 └── src/
-    ├── cli.py                       # 🎮 DRIVING ADAPTER — Hydra entry point, wires everything
+    ├── cli.py                       # DRIVING ADAPTER — Hydra entry point, wires everything
     │
-    ├── core/                        # 💎 INNER HEXAGON — zero external dependencies
+    ├── core/                        # INNER HEXAGON — zero external dependencies
     │   ├── domain/                  #    Pure data models (Pydantic)
     │   │   ├── config.py            #    ModelConfig, PreprocessingConfig
     │   │   ├── trial.py             #    TrialData, TrialMetadata
@@ -132,11 +132,11 @@ UULMI/
     │       ├── processor.py         #    PreprocessingStepPort
     │       └── tracker.py           #    TrackerPort
     │
-    ├── use_cases/                   # ⚙️ APPLICATION LOGIC — orchestrates ports
+    ├── use_cases/                   # APPLICATION LOGIC — orchestrates ports
     │   ├── preprocess.py            #    run_preprocessing_usecase()
     │   └── train.py                 #    run_training_usecase()
     │
-    ├── adapters/                    # 🔌 OUTER HEXAGON — concrete implementations
+    ├── adapters/                    # OUTER HEXAGON — concrete implementations
     │   ├── data/
     │   │   └── mne_adapter.py       #    MneDataLoaderAdapter → implements DataLoaderPort
     │   ├── preprocessing/
@@ -164,28 +164,28 @@ This shows **every `import` relationship** between project files. Notice how arr
 
 ```mermaid
 graph LR
-    subgraph "🎮 Entry Point"
+    subgraph "Entry Point"
         CLI["cli.py"]
     end
 
-    subgraph "⚙️ Use Cases"
+    subgraph "Use Cases"
         UC_Pre["use_cases/<br/>preprocess.py"]
         UC_Train["use_cases/<br/>train.py"]
     end
 
-    subgraph "🔷 Ports"
+    subgraph "Ports"
         P_Loader["ports/<br/>loader.py"]
         P_Model["ports/<br/>model.py"]
         P_Processor["ports/<br/>processor.py"]
         P_Tracker["ports/<br/>tracker.py"]
     end
 
-    subgraph "💎 Domain"
+    subgraph "Domain"
         D_Config["domain/<br/>config.py"]
         D_Trial["domain/<br/>trial.py"]
     end
 
-    subgraph "🔌 Adapters"
+    subgraph "Adapters"
         A_MneData["adapters/data/<br/>mne_adapter.py"]
         A_MnePrep["adapters/preprocessing/<br/>mne_preprocessing.py"]
         A_PyTorch["adapters/models/<br/>pytorch_adapter.py"]
@@ -194,7 +194,7 @@ graph LR
         A_EEGNet["adapters/models/<br/>pytorch/architectures/<br/>eegnet.py"]
     end
 
-    subgraph "🛠️ Utils"
+    subgraph "Utils"
         U_Concurrency["utils/<br/>concurrency.py"]
     end
 
@@ -360,20 +360,20 @@ This is the **single most important rule** of hexagonal architecture. Violations
 graph TB
     subgraph "What CAN import what"
         direction TB
-        R1["🎮 CLI / Driving Adapter"] -->|"✅ can import"| R2["⚙️ Use Cases"]
-        R1 -->|"✅ can import"| R3["🔌 Adapters"]
-        R1 -->|"✅ can import"| R4["🔷 Ports"]
-        R1 -->|"✅ can import"| R5["💎 Domain"]
+        R1["CLI / Driving Adapter"] -->|"can import"| R2["Use Cases"]
+        R1 -->|"can import"| R3["Adapters"]
+        R1 -->|"can import"| R4["Ports"]
+        R1 -->|"can import"| R5["Domain"]
         
-        R2 -->|"✅ can import"| R4
-        R2 -->|"✅ can import"| R5
+        R2 -->|"can import"| R4
+        R2 -->|"can import"| R5
         
-        R3 -->|"✅ can import"| R4
-        R3 -->|"✅ can import"| R5
+        R3 -->|"can import"| R4
+        R3 -->|"can import"| R5
         
-        R4 -->|"✅ can import"| R5
+        R4 -->|"can import"| R5
         
-        R5 -->|"❌ imports NOTHING<br/>from the project"| R5
+        R5 -->|"imports NOTHING<br/>from the project"| R5
     end
     
     style R1 fill:#e94560,color:#fff
@@ -384,7 +384,7 @@ graph TB
 ```
 
 > [!CAUTION]
-> **Violation detected**: [data.py](file:///home/z/Projects/AntigravityProjects/UULMI/src/core/domain/data.py) line 1 imports `from torch._inductor.cudagraph_trees import OutputList` — this is a framework dependency _inside_ the core domain, which breaks the hexagonal rule. The domain should only use standard library + Pydantic.
+> **Violation detected**: [data.py](file:///home/z/Projects/AntigravityProjects/UULMIC/src/core/domain/data.py) line 1 imports `from torch._inductor.cudagraph_trees import OutputList` — this is a framework dependency _inside_ the core domain, which breaks the hexagonal rule. The domain should only use standard library + Pydantic.
 
 ---
 
@@ -395,20 +395,20 @@ graph TB
     subgraph YOUR_PROJECT["Your Project"]
         direction TB
         
-        subgraph ENTRY["🎮 Entry / Driving Adapter"]
+        subgraph ENTRY["Entry / Driving Adapter"]
             EP["main.py / cli.py / api.py<br/>─────────────────<br/>• Reads config<br/>• Instantiates concrete adapters<br/>• Passes them to use cases"]
         end
         
-        subgraph UC["⚙️ Use Cases"]
+        subgraph UC["Use Cases"]
             UC1["run_X_usecase(port1, port2, ...)<br/>─────────────────<br/>• Pure orchestration<br/>• Only types ports & domain<br/>• Never mentions MNE, PyTorch, etc."]
         end
         
-        subgraph OUTER["🔌 Adapters"]
+        subgraph OUTER["Adapters"]
             A1["ConcreteAdapterA(PortInterface)<br/>─────────────────<br/>• Wraps external library<br/>• Implements port methods<br/>• Contains ALL framework code"]
             A2["ConcreteAdapterB(PortInterface)"]
         end
         
-        subgraph INNER["💎 Core"]
+        subgraph INNER["Core"]
             P1["PortInterface (ABC)<br/>─────────────────<br/>• Abstract methods only<br/>• Types use domain models<br/>• No implementation"]
             D1["DomainModels (Pydantic/dataclass)<br/>─────────────────<br/>• Pure data structures<br/>• Business validation rules<br/>• ZERO external dependencies"]
         end
@@ -431,7 +431,7 @@ graph TB
 
 ### Recipe for a New Hexagonal Project
 
-| Step | What to Do | UULMI Example |
+| Step | What to Do | UULMIC Example |
 |------|-----------|---------------|
 | **1. Define Domain** | Create pure data models with zero framework imports | `TrialData`, `TrialMetadata`, `ModelConfig`, `PreprocessingConfig` |
 | **2. Define Ports** | Write abstract base classes with method signatures typed using domain models | `DataLoaderPort`, `BaseModelPort`, `PreprocessingStepPort`, `TrackerPort` |
@@ -440,11 +440,11 @@ graph TB
 | **5. Wire in Entry Point** | The ONLY place where concrete adapters are instantiated and injected | `cli.py` creates `MneDataLoaderAdapter` and passes to `run_training_usecase()` |
 
 > [!TIP]
-> **The Litmus Test**: Can you delete an entire adapter folder and the project still compiles (minus the entry point wiring)? If yes, your hexagonal architecture is correct. In UULMI, deleting `adapters/tracking/wandb_adapter.py` would only require updating `cli.py` — no use case or domain code changes.
+> **The Litmus Test**: Can you delete an entire adapter folder and the project still compiles (minus the entry point wiring)? If yes, your hexagonal architecture is correct. In UULMIC, deleting `adapters/tracking/wandb_adapter.py` would only require updating `cli.py` — no use case or domain code changes.
 
 ---
 
-## 9. Key Design Decisions in UULMI
+## 9. Key Design Decisions in UULMIC
 
 | Decision | Rationale |
 |---|---|

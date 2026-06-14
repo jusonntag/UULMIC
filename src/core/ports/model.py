@@ -11,6 +11,8 @@ class BaseModelPort(ABC):
         self, 
         X: np.ndarray, 
         y: np.ndarray, 
+        X_val: Optional[np.ndarray] = None,
+        y_val: Optional[np.ndarray] = None,
         tracker: Optional['TrackerPort'] = None
     ) -> None:
         """Train the model"""

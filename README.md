@@ -1,4 +1,4 @@
-# UULMI - Unilateral upper limb motor imagery classification
+# UULMIC - Unilateral upper limb motor imagery classification
 
 Implementation of the research paper:
 
@@ -20,6 +20,32 @@ The raw data is publicly available here:
 - https://pub.uni-bielefeld.de/record/3004681#
 
 Please ensure you comply with the dataset's usage terms.
+
+---
+
+## Usage
+
+Run commands via `uv` to automatically handle dependencies and environments.
+
+**System Check (PyTorch & CUDA):**
+```bash
+uv run python main.py
+```
+
+**Preprocess Data:**
+```bash
+uv run uulmic mode=preprocess
+```
+
+**Train Models:**
+```bash
+uv run uulmic
+```
+
+*(Optional) Override config parameters on the fly:*
+```bash
+uv run uulmic model.batch_size=8
+```
 
 ---
 

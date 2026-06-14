@@ -2455,7 +2455,7 @@ wheels = [
 ]
 
 [[package]]
-name = "uulmi"
+name = "uulmic"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

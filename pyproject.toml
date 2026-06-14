@@ -1,5 +1,5 @@
 [project]
-name = "uulmi"
+name = "uulmic"
 version = "0.1.0"
 description = "Unilateral Upper Limb Motor Imagery Classification Pipeline"
 readme = "README.md"
@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-uulmi = "src.cli:main"
+uulmic = "src.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

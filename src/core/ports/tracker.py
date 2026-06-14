@@ -9,6 +9,11 @@ class TrackerPort(ABC):
         pass
 
     @abstractmethod
+    def init_run(self, run_name: str) -> None:
+        """Initialize a new tracking run"""
+        pass
+
+    @abstractmethod
     def log_metrics(self, metrics: Dict[str, float], step: int | None = None) -> None:
         """Log trial metrics (loss, accuracy, etc)"""
         pass

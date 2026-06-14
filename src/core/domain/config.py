@@ -63,7 +63,7 @@ class PreprocessingConfig(BaseModel):
     baseline_tmax: float = 0.0
 
     # Marker-to-label mapping: maps raw EEG annotation string -> integer class label
-    # Supports N classes. Example: {'11': 1, '12': 2, '13': 3, '98': 0, '99': 0}
+    # Supports N classes
     class_map: Dict[str, int] = {'11': 1, '12': 2, '13': 3, '98': 0, '99': 0}
 
     reference_channels: Optional[List[str]] = None

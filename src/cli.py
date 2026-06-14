@@ -24,7 +24,7 @@ def main(cfg: DictConfig):
 
     load_dotenv()
 
-    print(f"--- Running UULMI CLI ---")
+    print(f"--- Running UULMIC CLI ---")
     print(f"Mode: {cfg.mode}")
     
     # 1. Setup automatic safe concurrency & environment variables
@@ -39,8 +39,12 @@ def main(cfg: DictConfig):
         print(f"Loading data from {data_dir} to detect shape...")
         all_trials = loader.load_training_data(data_dir = data_dir)
         
+        if cfg.data.get("vps"):
+            all_trials = [t for t in all_trials if t.metadata.subject_id in cfg.data.vps]
+            print(f"Filtered to VPs: {cfg.data.vps}")
+        
         if not all_trials:
-             raise FileNotFoundError(f"No training data found in {data_dir}")
+             raise FileNotFoundError(f"No training data found in {data_dir} for VPs {cfg.data.get('vps', [])}")
         
         # 2. Extract shape
         detected_channels = all_trials[0].X.shape[1]
@@ -73,7 +77,7 @@ def main(cfg: DictConfig):
             model_cfg.samples = detected_samples
 
             # Setup Tracker for this model run
-            tracker = WandbTrackerAdapter(project_name="UULMI", run_name=f"run_{model_name}_{run_timestamp}")
+            tracker = WandbTrackerAdapter(project_name="UULMIC", run_name=f"run_{model_name}_{run_timestamp}")
 
             # 3. Instantiate model based on config
             if model_name == "eegnet":

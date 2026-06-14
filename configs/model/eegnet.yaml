@@ -4,10 +4,10 @@
 name: "eegnet"
 
 # Training hyperparameters
-epochs: 500
+epochs: 10
 lr: 0.001
-batch_size: 32
-training_mode: "independent"
+batch_size: 8
+training_mode: "independent" # "combined" 
 optimizer: "adamw"
 loss: "cross_entropy"
 metrics: ["accuracy"]

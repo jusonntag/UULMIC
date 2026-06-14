@@ -32,7 +32,7 @@ class SklearnModelAdapter(BaseModelPort):
         return {"accuracy": float(score)}
 
     def get_params(self) -> Dict[str, Any]:
-        # Return UULMI ModelConfig combined with sklearn estimator parameters
+        # Return UULMIC ModelConfig combined with sklearn estimator parameters
         params = self.config.model_dump()
         try:
             params.update(self.estimator.get_params())
