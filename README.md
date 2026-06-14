@@ -32,6 +32,11 @@ This repository contains deep learning and machine learning implementations for 
      ```env
      WANDB_API_KEY=your_api_token_here
      ```
+
+5. **Data Setup:**
+   The raw dataset is publicly available [here](https://pub.uni-bielefeld.de/record/3004681#) (please ensure you comply with the usage terms).
+   - Download the required dataset.
+   - Place the `.fif` and `.set` files for the participant(s) directly into the `data/raw/` directory.
 ## Usage
 
 Run commands via `uv` to automatically handle dependencies and environments.
@@ -64,13 +69,6 @@ Sonntag J, Yu L, Wang X and Schack T (2025)
 - Frontiers in Human Neuroscience, 19:1617748.
 
 - https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full
-
-
----
-The raw data is publicly available here:
-- https://pub.uni-bielefeld.de/record/3004681#
-
-Please ensure you comply with the dataset's usage terms.
 
 ---
 
