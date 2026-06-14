@@ -1,23 +1,24 @@
 # UULMIC — Unilateral Upper Limb Motor Imagery Classification
 
-> **A learning project.** I built this EEG classification pipeline to practice hexagonal (ports & adapters) architecture and to learn building a small deep learning training pipeline end-to-end. The focus was on clean separation of concerns and understanding the patterns — not on production polish.
+> Learning Project
 
 ---
 
 ## What This Is
 
-A modular pipeline for classifying unilateral upper limb motor imagery from EEG data, built around the code companion for [this paper](https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full). It covers the full workflow: raw EEG → preprocessing (filtering, ICA, epoching) → model training → experiment tracking.
+A modular pipeline for classifying unilateral upper limb motor imagery from EEG data, built around the code companion for [this paper](https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full). It covers the full workflow: 
+ >raw EEG --> preprocessing --> model training --> experiment tracking.
 
 The architecture follows **hexagonal / ports & adapters** principles: domain models and abstract ports in the center, concrete adapters (MNE-Python, PyTorch, W&B) on the outside, wired together in a single CLI entry point.
 
-📐 **[Architecture Deep Dive →](UULMIC_hexagonal_architecture.md)** — Full Mermaid diagrams, dependency graphs, port-adapter mapping, and a transferable template.
+📐 **[Architecture Deep Dive →](UULMIC_hexagonal_architecture.md)** Full Mermaid diagrams, dependency graphs, port-adapter mapping, and a transferable template.
 
 ## Limitations
 
-- **Only EEGNet** — FBCNet and NFEEG architectures not yet implemented
-- **`train_test_split` leaks into the use case layer** — this is a hexagonal architecture violation (sklearn imported directly in the orchestration layer). In a real project, splitting logic should be abstracted behind a port or moved into the adapter.
+- **Only EEGNet** | FBCNet and NFEEG architectures not yet implemented
+- **`train_test_split` leaks into the use case layer**
 - **Combined training mode is a TODO**
-- **SklearnModelAdapter is incomplete** — missing `reset()` and `save()` implementations
+- **SklearnModelAdapter is incomplete**
 - **No early stopping**
 
 ---
@@ -27,7 +28,6 @@ The architecture follows **hexagonal / ports & adapters** principles: domain mod
 - [x] Add TODO comments to empty stub files
 - [ ] Fix `Any` import bug in `preprocess.py`
 - [ ] Add `reset()`/`save()` to `SklearnModelAdapter`
-- [ ] Fix `.gitignore` self-ignore + clean cached build artifacts
 - [ ] Clean stale references in architecture doc
 - [ ] Export architecture diagram as PNG for README
 - [ ] Move `train_test_split` behind a port (or document the violation)
