@@ -1,36 +1,10 @@
 # UULMIC - Unilateral upper limb motor imagery classification
 
-Implementation of the research paper:
-
-**"Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification"**
-
 This repository contains deep learning and machine learning implementations for classifying unilateral upper limb motor imagery using EEG data.
-
-## Paper:
-Sonntag J, Yu L, Wang X and Schack T (2025)  
-- *Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification.* 
-
-- Frontiers in Human Neuroscience, 19:1617748.
-
-- https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full
-
-
----
-The raw data is publicly available here:
-- https://pub.uni-bielefeld.de/record/3004681#
-
-Please ensure you comply with the dataset's usage terms.
-
----
 
 ## Usage
 
 Run commands via `uv` to automatically handle dependencies and environments.
-
-**System Check (PyTorch & CUDA):**
-```bash
-uv run python main.py
-```
 
 **Preprocess Data:**
 ```bash
@@ -46,6 +20,27 @@ uv run uulmic
 ```bash
 uv run uulmic model.batch_size=8
 ```
+
+---
+Based on the research paper:
+
+**"Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification"**
+
+
+## Paper:
+Sonntag J, Yu L, Wang X and Schack T (2025)  
+- *Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification.* 
+
+- Frontiers in Human Neuroscience, 19:1617748.
+
+- https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full
+
+
+---
+The raw data is publicly available here:
+- https://pub.uni-bielefeld.de/record/3004681#
+
+Please ensure you comply with the dataset's usage terms.
 
 ---
 
