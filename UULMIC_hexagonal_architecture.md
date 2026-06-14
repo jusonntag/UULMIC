@@ -124,8 +124,7 @@ UULMIC/
     ├── core/                        # INNER HEXAGON — zero external dependencies
     │   ├── domain/                  #    Pure data models (Pydantic)
     │   │   ├── config.py            #    ModelConfig, PreprocessingConfig
-    │   │   ├── trial.py             #    TrialData, TrialMetadata
-    │   │   └── data.py              #    (Legacy duplicate — same models)
+    │   │   └── trial.py             #    TrialData, TrialMetadata
     │   └── ports/                   #    Abstract interfaces (ABC)
     │       ├── loader.py            #    DataLoaderPort
     │       ├── model.py             #    BaseModelPort
@@ -383,8 +382,8 @@ graph TB
     style R5 fill:#1a1a2e,color:#e94560,stroke:#e94560
 ```
 
-> [!CAUTION]
-> **Violation detected**: [data.py](file:///home/z/Projects/AntigravityProjects/UULMIC/src/core/domain/data.py) line 1 imports `from torch._inductor.cudagraph_trees import OutputList` — this is a framework dependency _inside_ the core domain, which breaks the hexagonal rule. The domain should only use standard library + Pydantic.
+> [!NOTE]
+> `data.py` (a legacy duplicate of `trial.py` that imported from `torch`) was removed. The domain layer now has zero framework dependencies as intended.
 
 ---
 

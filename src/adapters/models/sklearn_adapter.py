@@ -18,7 +18,7 @@ class SklearnModelAdapter(BaseModelPort):
             return X.reshape(X.shape[0], -1)
         return X
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
+    def fit(self, X: np.ndarray, y: np.ndarray, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, tracker: Optional[Any] = None) -> None:
         X_flat = self._flatten_X(X)
         self.estimator.fit(X_flat, y)
 
@@ -40,3 +40,11 @@ class SklearnModelAdapter(BaseModelPort):
             # If estimator lacks get_params
             pass
         return params
+
+    def reset(self) -> None:
+        # TODO: Implement proper reset for sklearn estimators
+        raise NotImplementedError("SklearnModelAdapter does not support reset() yet")
+
+    def save(self, path: str) -> None:
+        # TODO: Implement model persistence (e.g. joblib.dump)
+        raise NotImplementedError("SklearnModelAdapter does not support save() yet")

@@ -1,6 +1,38 @@
-# UULMIC - Unilateral upper limb motor imagery classification
+# UULMIC — Unilateral Upper Limb Motor Imagery Classification
 
-This repository contains deep learning and machine learning implementations for classifying unilateral upper limb motor imagery using EEG data.
+> **A learning project.** I built this EEG classification pipeline to practice hexagonal (ports & adapters) architecture and to learn building a small deep learning training pipeline end-to-end. The focus was on clean separation of concerns and understanding the patterns — not on production polish.
+
+---
+
+## What This Is
+
+A modular pipeline for classifying unilateral upper limb motor imagery from EEG data, built around the code companion for [this paper](https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full). It covers the full workflow: raw EEG → preprocessing (filtering, ICA, epoching) → model training → experiment tracking.
+
+The architecture follows **hexagonal / ports & adapters** principles: domain models and abstract ports in the center, concrete adapters (MNE-Python, PyTorch, W&B) on the outside, wired together in a single CLI entry point.
+
+📐 **[Architecture Deep Dive →](UULMIC_hexagonal_architecture.md)** — Full Mermaid diagrams, dependency graphs, port-adapter mapping, and a transferable template.
+
+## Limitations
+
+- **Only EEGNet** — FBCNet and NFEEG architectures not yet implemented
+- **`train_test_split` leaks into the use case layer** — this is a hexagonal architecture violation (sklearn imported directly in the orchestration layer). In a real project, splitting logic should be abstracted behind a port or moved into the adapter.
+- **Combined training mode is a TODO**
+- **SklearnModelAdapter is incomplete** — missing `reset()` and `save()` implementations
+- **No early stopping**
+
+---
+
+## TODO
+
+- [x] Add TODO comments to empty stub files
+- [ ] Fix `Any` import bug in `preprocess.py`
+- [ ] Add `reset()`/`save()` to `SklearnModelAdapter`
+- [ ] Fix `.gitignore` self-ignore + clean cached build artifacts
+- [ ] Clean stale references in architecture doc
+- [ ] Export architecture diagram as PNG for README
+- [ ] Move `train_test_split` behind a port (or document the violation)
+
+---
 
 ## Installation
 
@@ -37,6 +69,7 @@ This repository contains deep learning and machine learning implementations for 
    The raw dataset is publicly available [here](https://pub.uni-bielefeld.de/record/3004681#) (please ensure you comply with the usage terms).
    - Download the required dataset.
    - Place the `.fif` and `.set` files for the participant(s) directly into the `data/raw/` directory.
+
 ## Usage
 
 Run commands via `uv` to automatically handle dependencies and environments.
@@ -57,41 +90,13 @@ uv run uulmic model.batch_size=8
 ```
 
 ---
-Based on the research paper:
 
-**"Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification"**
+## Paper Reference
 
+Based on:
 
-## Paper:
-Sonntag J, Yu L, Wang X and Schack T (2025)  
-- *Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification.* 
+> Sonntag J, Yu L, Wang X and Schack T (2025) *Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification.* Frontiers in Human Neuroscience, 19:1617748. [doi:10.3389/fnhum.2025.1617748](https://doi.org/10.3389/fnhum.2025.1617748)
 
-- Frontiers in Human Neuroscience, 19:1617748.
-
-- https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2025.1617748/full
-
----
-
-## Abstract
-
-### Introduction:
-
-Motor imagery-based brain-computer interfaces (BCIs) are a technique for decoding and classifying the intention of motor execution, solely based on imagined (rather than executed) movements. Although deep learning techniques have increased the potential of BCIs, the complexity of decoding unilateral upper limb motor imagery remains challenging. To understand whether neurophysiological features, which are directly related to neural mechanisms of motor imagery, might influence classification accuracy, most studies have largely leveraged traditional machine learning frameworks, leaving deep learning-based techniques underexplored.
-
-### Methods:
-
-In this work, three different deep learning models from the literature (EEGNet, FBCNet, NFEEG) and two common spatial pattern-based machine learning classifiers (SVM, LDA) were used to classify imagined right elbow flexion and extension from participants using electroencephalography data. From two recorded resting states (eyes-open, eyes-closed), absolute and relative alpha and beta power of the frontal, fronto-central and central electrodes were used to predict the accuracy of the different classifiers.
-
-## Results:
-
-The prediction of classifier accuracies by neurophysiological features revealed negative correlations between the relative alpha band and classifier accuracies and positive correlations between the absolute and relative beta band and classifiers accuracies. Most ipsilateral EEG channels yielded significant correlations with classifier accuracies, especially for the machine learning classifier.
-
-## Discussion:
-
-This pattern contrasts with previous findings from bilateral MI paradigms, where contralateral alpha and beta activity were more influential. These inverted correlations suggest task-specific neurophysiological mechanisms in unilateral MI, emphasizing the role of ipsilateral inhibition and attentional processes.
-
-
----
 ```bibtex
 @article{sonntag2025neurophysiological,
   title={Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification},
@@ -103,8 +108,9 @@ This pattern contrasts with previous findings from bilateral MI paradigms, where
   doi={10.3389/fnhum.2025.1617748}
 }
 ```
----
-APA (6th ed.):
-```bibtex
-@article{Sonntag J, Yu L, Wang X and Schack T (2025) Neurophysiological predictors of deep learning based unilateral upper limb motor imagery classification. Front. Hum. Neurosci. 19:1617748. doi: 10.3389/fnhum.2025.1617748}
 
+---
+
+## License
+
+[MIT](LICENSE)
