@@ -1,7 +1,7 @@
-mode: "train" # options: "train", "preprocess"
+mode: "train" # "train" | "preprocess"
 
 # In train mode, iterate through these model configs:
-models_to_train: ["eegnet"] # Use ["all"] to iterate all models in configs/model/
+models_to_train: ["eegnet"] # ["all"] iterate models in configs/model/
 model_save_dir: "data/trained_models"
 
 defaults:

@@ -1,5 +1,8 @@
 # EEGNet architecture config
-# Reference: https://iopscience.iop.org/article/10.1088/1741-2552/aace8c
+# Lawhern, V. J., Solon, A. J., Waytowich, N. R., Gordon, S. M., Hung, C. P.,
+# Lance, B. J. (2018). EEGNet: a compact convolutional neural network for
+# EEG-based brain–computer interfaces. J. Neural Eng. 15:056013.
+# doi: 10.1088/1741-2552/aace8c
 
 name: "eegnet"
 
