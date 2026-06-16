@@ -130,10 +130,10 @@ class EEGNet(nn.Module):
             activation = nn.Softmax(dim=1)
         elif config.output_activation == "sigmoid":
             activation = nn.Sigmoid()
-        else: # default linear
+        else: # Default linear
             activation = nn.Identity()
 
-        # classification block
+        # Classification block
         self.classify = nn.Sequential(
             nn.Flatten(),
             nn.Linear(
@@ -156,7 +156,7 @@ class EEGNet(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Shape of input data should be (Batch, Channels, Samples)."""
-        assert x.ndim == 3, f"Input data must be 3D (Batch, Channels, Samples), but got {x.ndim}D"
+        assert x.ndim == 3, f"Input data must be 3D (Batch, Channels, Samples), got {x.ndim}D"
         # Add channel dimension
         x = x.unsqueeze(1)
         # block 1
