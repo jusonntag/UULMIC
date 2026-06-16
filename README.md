@@ -1,6 +1,4 @@
-# UULMIC — Unilateral Upper Limb Motor Imagery Classification
-
-> Learning Project
+# UULMIC - Unilateral Upper Limb Motor Imagery Classification
 
 ---
 
@@ -11,7 +9,7 @@ A modular pipeline for classifying unilateral upper limb motor imagery from EEG 
 
 The architecture follows **hexagonal / ports & adapters** principles: domain models and abstract ports in the center, concrete adapters (MNE-Python, PyTorch, W&B) on the outside, wired together in a single CLI entry point.
 
-📐 **[Architecture Deep Dive →](UULMIC_hexagonal_architecture.md)** Full Mermaid diagrams, dependency graphs, port-adapter mapping, and a transferable template.
+📐 **[Architecture Deep Dive](UULMIC_hexagonal_architecture.md)** Full Mermaid diagrams, dependency graphs, port-adapter mapping, and a transferable template.
 
 ## Limitations
 
@@ -31,6 +29,8 @@ The architecture follows **hexagonal / ports & adapters** principles: domain mod
 - [ ] Clean stale references in architecture doc
 - [ ] Export architecture diagram as PNG for README
 - [ ] Move `train_test_split` behind a port (or document the violation)
+- [ ] Add preprocessing and CSP extraction for SVM & LDA
+- [ ] Add SVM & LDA as classifiers for benchmarking
 
 ---
 
