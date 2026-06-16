@@ -4,6 +4,7 @@ from typing import Any, Dict
 from src.core.ports.tracker import TrackerPort
 
 class WandbTrackerAdapter(TrackerPort):
+    """Inits base for WandB tracker."""
     def __init__(self, project_name: str, group_name: str | None = None, run_name: str | None = None):
         self.project_name = project_name
         self.group_name = group_name
@@ -12,6 +13,7 @@ class WandbTrackerAdapter(TrackerPort):
             self.init_run(run_name)
             
     def init_run(self, run_name: str) -> None:
+        """Inits for isolated training run."""
         if self.run is not None:
             self.finish()
         self.run = wandb.init(

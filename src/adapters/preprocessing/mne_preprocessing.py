@@ -6,6 +6,7 @@ from src.core.domain.config import PreprocessingConfig
 from src.core.domain.trial import TrialData, TrialMetadata
 
 class MneFilterStep(PreprocessingStepPort):
+    """Filters data absed on configurated frequencies."""
     def process(self, data: mne.io.Raw) -> mne.io.Raw:
         # Filter raw data
         filtered = data.copy()
@@ -20,6 +21,7 @@ class MneFilterStep(PreprocessingStepPort):
         return filtered
 
 class MneResampleStep(PreprocessingStepPort):
+    """Resamples data to configured sample size."""
     def process(self, data: mne.io.Raw) -> mne.io.Raw:
         resampled = data.copy()
         print(f'\033[90mResampling data from {data.info["sfreq"]} Hz to {self.config.target_sample_rate} Hz\033[0m')
@@ -27,6 +29,7 @@ class MneResampleStep(PreprocessingStepPort):
         return resampled
 
 class MneICAStep(PreprocessingStepPort):
+    """Removes EOG, muscle and other bad artifacts."""
     def process(self, data: mne.io.Raw) -> mne.io.Raw:
         if not self.config.ica:
             return data
@@ -51,6 +54,7 @@ class MneICAStep(PreprocessingStepPort):
         return ica_data
 
 class MneReferencingStep(PreprocessingStepPort):
+    """Applies referencing to 'average' or manually defined channels."""
     def process(self, data: mne.io.Raw) -> mne.io.Raw:
         ref_data = data.copy()
         removed_channels = []
@@ -79,20 +83,16 @@ class MneReferencingStep(PreprocessingStepPort):
             ref_data.drop_channels(removed_channels)
             
         # Store removed channels in the info object for later retrieval by EpochingStep
-        # MNE doesn't have a standard field for this, so we use 'description' or a custom attribute if we can.
-        # However, passing it through the Raw object is tricky. 
-        # Better: we can attach it to the Raw object as a dynamic attribute.
         ref_data._removed_channels = removed_channels
         
         return ref_data
 
 class MneEpochingStep(PreprocessingStepPort):
+    """Cuts data into euqally long sequences based on config."""
     def process(self, data: mne.io.Raw) -> TrialData:
         events, event_id = mne.events_from_annotations(data)
         
-        # Build MNE event selection and label mapping from config.class_map.
-        # config.class_map: { raw_marker_string -> integer_class_label }
-        # Strips whitespace from annotation strings to handle brittle recordings (e.g. ' 99 ' -> '99')
+        # Strips whitespace from annotation strings to handle brittle recordings
         clean_event_id: dict = {}
         mne_to_label: dict[int, int] = {}
         
@@ -134,8 +134,7 @@ class MneEpochingStep(PreprocessingStepPort):
         # Remap MNE's arbitrary integer event IDs to true model integer labels
         y = np.array([mne_to_label[m_id] for m_id in labels_from_mne])
         
-        # Derive human-readable class list from the class_map.
-        # Group marker strings that share the same integer label.
+        # Derive readable class list from the class_map
         unique_labels = sorted(set(self.config.class_map.values()))
         label_to_markers: dict[int, list[str]] = {}
         for marker, label in self.config.class_map.items():

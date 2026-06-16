@@ -2,49 +2,60 @@ import numpy as np
 from typing import Dict, Any, Optional
 from src.core.ports.model import BaseModelPort
 from src.core.domain.config import ModelConfig
+from sklearn.metrics import (
+    precision_score,
+    recall_score,
+    f1_score,
+    cohen_kappa_score
+)
 
 class SklearnModelAdapter(BaseModelPort):
-    """
-    Adapter for any scikit-learn estimator or pipeline.
-    Expects an estimator implementing `fit` and `predict` (or `predict_proba`).
-    """
+    """Adapter for any scikit-learn estimator or pipeline."""
     def __init__(self, config: ModelConfig, estimator: Any):
         self.config = config
         self.estimator = estimator
 
-    def _flatten_X(self, X: np.ndarray) -> np.ndarray:
-        """Flatten epochs (n_trials, n_channels, n_times) to 2D for standard sklearn."""
-        if X.ndim > 2:
-            return X.reshape(X.shape[0], -1)
-        return X
+    def _calc_csps(self, X: np.ndarray) -> np.ndarray:
+        """Calculates Common Spatial Patters (CSPs) for X."""
+        # TODO Implement CPSs
+        raise NotImplementedError("Can't calculate CSPs yet.")
 
     def fit(self, X: np.ndarray, y: np.ndarray, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, tracker: Optional[Any] = None) -> None:
-        X_flat = self._flatten_X(X)
-        self.estimator.fit(X_flat, y)
+        """Trains the configured model with passed data."""
+        X_csp = self._calc_csps(X)
+        self.estimator.fit(X_csp, y)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        X_flat = self._flatten_X(X)
-        return self.estimator.predict(X_flat)
+        """Model calculates labels based on input data."""
+        X_csp = self._calc_csps(X)
+        return self.estimator.predict(X_csp)
 
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict[str, float]:
-        X_flat = self._flatten_X(X)
-        score = self.estimator.score(X_flat, y)
-        return {"accuracy": float(score)}
+        """Full calculation of metric scores: acc, precision, recall, f1 & kappa."""
+        X_csp = self._calc_csps(X)
+        preds = self.predict(X_csp)
+        accuracy = (preds == y).mean()
+        precision = precision_score(y, preds, average='weighted', zero_division=0)
+        recall = recall_score(y, preds, average='weighted', zero_division=0)
+        f1 = f1_score(y, preds, average='weighted', zero_division=0)
+        kappa = cohen_kappa_score(y, preds)
+
+        return {
+            "accuracy": float(accuracy),
+            "precision": float(precision),
+            "recall": float(recall),
+            "f1": float(f1),
+            "kappa": float(kappa)
+        }
 
     def get_params(self) -> Dict[str, Any]:
-        # Return UULMIC ModelConfig combined with sklearn estimator parameters
-        params = self.config.model_dump()
-        try:
-            params.update(self.estimator.get_params())
-        except AttributeError:
-            # If estimator lacks get_params
-            pass
-        return params
+        """Log training config and total model parameters count."""
+        raise NotImplementedError("SklearnModelAdapter does not support get_params() yes")
 
     def reset(self) -> None:
         # TODO: Implement proper reset for sklearn estimators
         raise NotImplementedError("SklearnModelAdapter does not support reset() yet")
 
     def save(self, path: str) -> None:
-        # TODO: Implement model persistence (e.g. joblib.dump)
+        # TODO: Implement model persistence
         raise NotImplementedError("SklearnModelAdapter does not support save() yet")

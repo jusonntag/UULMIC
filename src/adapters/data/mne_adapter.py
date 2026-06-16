@@ -12,7 +12,7 @@ class MneDataLoaderAdapter(DataLoaderPort):
         self.data_dir = Path(data_dir)
         
     def load_training_data(self, data_dir: Path) -> TrialData:
-        # Load X and Y numpy arrays
+        """Loads X and Y as numpy arrays."""
         vps = list(data_dir.glob("VP*"))
 
         total_data = []
@@ -38,14 +38,16 @@ class MneDataLoaderAdapter(DataLoaderPort):
         
             total_data.append(TrialData(X = X, y = y, metadata = metadata))
         
+        if not total_data:
+            raise FileNotFoundError(f"No files found in {self.data_dir}.")
+        
         return total_data
         
-    def load_raw_subject(self, vp_id: str) -> mne.io.Raw:
-        # Load the Raw .set file from data/raw/{vp_id}
-        vp_dir = self.data_dir #/ vp_id
-        for file in vp_dir.iterdir():
+    def load_raw_subjects(self, vp_id: str) -> mne.io.Raw:
+        """Loads raw files"""
+        for file in self.data_dir.iterdir():
             if file.name.endswith('.set'):
                 return mne.io.read_raw_eeglab(file, preload=True)
             elif file.name.endswith('.fif'):
                 return mne.io.read_raw_fif(file, preload=True)
-        raise FileNotFoundError(f"No raw data found for {vp_id} in {vp_dir}")
+        raise FileNotFoundError(f"No raw data found for {vp_id}.")

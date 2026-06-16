@@ -1,18 +1,30 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import (
+    TensorDataset,
+    DataLoader,
+)
 import numpy as np
-from typing import Dict, Any, Type, Callable, Optional
-from sklearn.metrics import precision_score, recall_score, f1_score, cohen_kappa_score
+from typing import (
+    Dict,
+    Any,
+    Type,
+    Callable,
+    Optional
+)
+from sklearn.metrics import (
+    precision_score,
+    recall_score,
+    f1_score,
+    cohen_kappa_score
+)
 
 from src.core.ports.model import BaseModelPort
 from src.core.domain.config import ModelConfig
 
+
 class PyTorchModelAdapter(BaseModelPort):
-    """
-    A generic PyTorch Trainer adapter. 
-    It can wrap ANY torch.nn.Module (EEGNet, FBCNet, etc).
-    """
+    """PyTorch Trainer adapter which wraps any torch.nn.Module."""
     def __init__(
         self, 
         config: ModelConfig, 
@@ -25,7 +37,8 @@ class PyTorchModelAdapter(BaseModelPort):
         self.criterion = self._get_criterion(self.config.loss)
         self.optimizer_cls = self._get_optimizer(self.config.optimizer)
         
-        # We need weight_decay for L2 regularization
+        # weight_decay adds L2 penalty to prevent
+        # overfitting on small per-subject datasets
         self.optimizer = self.optimizer_cls(
             self.model.parameters(), 
             lr=self.config.lr,
@@ -33,6 +46,7 @@ class PyTorchModelAdapter(BaseModelPort):
         )
 
     def _get_criterion(self, loss_name: str) -> nn.Module:
+        """Maps hydra config to pytorch's loss functions."""
         loss_map = {
             "cross_entropy": nn.CrossEntropyLoss(),
             "nll": nn.NLLLoss(),
@@ -43,6 +57,7 @@ class PyTorchModelAdapter(BaseModelPort):
         return loss_map[loss_name]
 
     def _get_optimizer(self, opt_name: str) -> Type[torch.optim.Optimizer]:
+        """Maps hydra config to pytorch's optimizer."""
         opt_map = {
             "adam": torch.optim.Adam,
             "sgd": torch.optim.SGD,
@@ -53,7 +68,7 @@ class PyTorchModelAdapter(BaseModelPort):
         return opt_map[opt_name]
         
     def fit(self, X: np.ndarray, y: np.ndarray, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, tracker: Optional['TrackerPort'] = None) -> None:
-        # Wrap in dataloader (X is passed exactly as provided by TrialData)
+        """Trains the configured model with passed data."""
         X_tensor = torch.FloatTensor(X)
         y_tensor = torch.LongTensor(y)
 
@@ -95,6 +110,7 @@ class PyTorchModelAdapter(BaseModelPort):
                 "train_acc": train_acc
             }
             
+            # Calculates test loss & acc after trainingstep
             val_loss_val = None
             val_acc_val = None
             if X_val is not None and y_val is not None:
@@ -122,6 +138,7 @@ class PyTorchModelAdapter(BaseModelPort):
                 print(print_str)
                 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Model calculates labels based on input data."""
         self.model.eval()
         X_tensor = torch.FloatTensor(X).to(self.device)
 
@@ -131,6 +148,7 @@ class PyTorchModelAdapter(BaseModelPort):
         return predicted.cpu().numpy()
         
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict[str, float]:
+        """Full calculation of metric scores: acc, precision, recall, f1 & kappa."""
         preds = self.predict(X)
         accuracy = (preds == y).mean()
         precision = precision_score(y, preds, average='weighted', zero_division=0)
@@ -147,7 +165,7 @@ class PyTorchModelAdapter(BaseModelPort):
         }
         
     def get_params(self) -> Dict[str, Any]:
-        # Log training config and total model parameters count
+        """Log training config and total model parameters count."""
         params = self.config.model_dump()
         params['total_parameters'] = sum(p.numel() for p in self.model.parameters())
         params['model_class'] = self.model.__class__.__name__
@@ -175,5 +193,5 @@ class PyTorchModelAdapter(BaseModelPort):
         )
 
     def save(self, path: str) -> None:
-        """Save the model state dictionary to the specified path"""
+        """Save the model state dictionary to the specified path."""
         torch.save(self.model.state_dict(), path)
