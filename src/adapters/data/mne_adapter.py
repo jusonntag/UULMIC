@@ -43,11 +43,12 @@ class MneDataLoaderAdapter(DataLoaderPort):
         
         return total_data
         
-    def load_raw_subjects(self, vp_id: str) -> mne.io.Raw:
-        """Loads raw files"""
+    def load_raw_subject(self, vp_id: str) -> mne.io.Raw:
+        """Loads raw file."""
         for file in self.data_dir.iterdir():
-            if file.name.endswith('.set'):
-                return mne.io.read_raw_eeglab(file, preload=True)
-            elif file.name.endswith('.fif'):
-                return mne.io.read_raw_fif(file, preload=True)
+            if vp_id in file.name:
+                if file.name.endswith('.set'):
+                    return mne.io.read_raw_eeglab(file, preload=True)
+                elif file.name.endswith('.fif'):
+                    return mne.io.read_raw_fif(file, preload=True)
         raise FileNotFoundError(f"No raw data found for {vp_id}.")

@@ -11,6 +11,6 @@ class DataLoaderPort(ABC):
         pass
         
     @abstractmethod
-    def load_raw_subjects(self, vp_id: str) -> Any:
+    def load_raw_subject(self, vp_id: str) -> Any:
         """Load raw subject data."""
         pass

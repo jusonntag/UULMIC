@@ -36,11 +36,11 @@ def run_training_usecase(
                 subject_id = trial_data.metadata.subject_id
                 print(f"\n--- Training on Subject: {subject_id} ---")
                 
-                # 1. Initialize Tracker Run (if independent)
+                # 1. Initialize Tracker Run
                 if mode == "independent":
                     tracker.init_run(f"{run_id}_{subject_id}")
                 
-                # 2. Reset model weights if in independent mode
+                # 2. Reset model weights 
                 if mode == "independent":
                     print(f"Resetting model for {subject_id}...")
                     model.reset()
@@ -68,9 +68,7 @@ def run_training_usecase(
                 # 6. Evaluate
                 metrics = model.evaluate(X_test, y_test)
                 
-                # Log prefixed metrics (e.g. VP110_accuracy) for summary tracking
-                # Distinguish between train and test accuracy if needed, 
-                # but 'accuracy' from evaluate is typically the test accuracy.
+                # TODO Log prefixed metrics for summary tracking
                 prefixed_metrics = {f"{subject_id}_test_{k}": v for k, v in metrics.items()}
                 
                 # 7. Save Model
@@ -82,8 +80,8 @@ def run_training_usecase(
                 print(f"Model saved to {save_path}")
 
         elif mode == "combined":
-            # Switch for combined dataset training (to be implemented)
-            print("INFO: Combined training mode selected. Merging logic not yet implemented.")
+            # Switch for combined dataset training
+            raise NotImplementedError("INFO: Combined training mode selected. Merging logic not yet implemented.")
             # TODO: Implement data concatenation and single training run
             pass
 

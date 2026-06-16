@@ -37,8 +37,8 @@ def preprocess_single_vp(vp_id: str, loader: DataLoaderPort, steps: List[Preproc
         # Attach subject_id for downstream metadata creation
         raw_data.subject_id = vp_id
         
-        # 1. Identify "Base" steps vs "Final" steps.
-        # Everything before the last step (assumed to be Epoching) is Base.
+        # 1. Identify 'Base'" steps vs 'Final' steps
+        # Last step assumed to be Epoching
         if not steps:
             return
             
@@ -57,23 +57,21 @@ def preprocess_single_vp(vp_id: str, loader: DataLoaderPort, steps: List[Preproc
             print(f"[\033[94m{vp_id}\033[0m] \033[93mSplitting data into\033[0m: \033[95m{list(config.splits.keys())}\033[0m")
             for split_name, markers in config.splits.items():
                 print(f"[\033[94m{vp_id}\033[0m] \033[92mExecuting split\033[0m: \033[95m{split_name}\033[0m")
-                # Create a temporary config override for this split
-                # We filter the class_map to only include markers for this split
+                # Filters the class_map to only include markers for this split
                 split_class_map = {m: label for m, label in config.class_map.items() if m in markers}
                 
                 if not split_class_map:
                     print(f"[{vp_id}] Warning: Split '{split_name}' has no matching markers in class_map. Skipping.")
                     continue
                 
-                # Clone final step with temporary split config
-                # Note: We create a shallow copy of config to avoid polluting other threads
+                # Creates a shallow copy of config to avoid polluting other threads
                 temp_config = config.model_copy()
                 temp_config.class_map = split_class_map
                 
-                # Re-instantiate the final step (Epoching) with the split config
-                # We use the same class as the final_step
+                # Re-instantiates the epoching with the split config
                 split_step = final_step.__class__(config=temp_config)
                 
+                # 4. Save preprocessed data
                 try:
                     split_result = split_step.process(processed_data)
                     save_path = output_dir / split_name / vp_id
@@ -81,8 +79,10 @@ def preprocess_single_vp(vp_id: str, loader: DataLoaderPort, steps: List[Preproc
                 except Exception as split_err:
                     print(f"[\033[94m{vp_id}\033[0m] \033[91mError in split '{split_name}': {split_err}\033[0m")
         else:
-            # Legacy behavior: just run the final step once
+            # Runs the final step once
             processed_data = final_step.process(processed_data)
+            
+            # 4. Save preprocessed data
             _save_processed_data(processed_data, vp_id, output_dir / vp_id)
             
         print(f"[\033[94m{vp_id}\033[0m] \033[92mFinished preprocessing.\033[0m")
@@ -101,7 +101,7 @@ def run_preprocessing_usecase(
 ):
     # Free-threaded python will truly parallelize this without GIL
     if max_workers is None:
-        # Default safety logic: limit to CPU cores or max 4 to avoid OOM
+        # For safety: limits to CPU cores or max 4 to avoid OOM
         max_workers = min(os.cpu_count() or 4, 4)
         
     print(f"Running preprocessing on {len(vp_ids)} participants with {max_workers} threads...")
